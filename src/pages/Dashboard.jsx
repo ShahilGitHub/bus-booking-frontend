@@ -17,7 +17,6 @@ try{
 const res = await fetch(API_URL)
 const data = await res.json()
 
-// show only booked seats
 const formatted = data
 .filter(ticket => ticket.status === "closed")
 .map(ticket => ({
@@ -48,27 +47,18 @@ fetchTickets()
 },[])
 
 
-// Delete only selected seat
+// Delete single seat
 const deleteTicket = async (seatNumber) => {
 
 try{
 
 await fetch(
-`https://bus-booking-backend-yni2.onrender.com/api/tickets/${seatNumber}`,
+`${API_URL}/${seatNumber}`,
 {
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-firstName:"",
-lastName:"",
-email:""
+method:"DELETE"
 })
-}
-)
 
-alert("Booking removed")
+alert("Booking deleted")
 
 fetchTickets()
 
@@ -98,16 +88,40 @@ setEditIndex(null)
 }
 
 
-// Save edit locally (UI only)
-const saveEdit = () => {
+// Save edited passenger
+const saveEdit = async () => {
 
-let updated = [...tickets]
+try{
 
-updated[editIndex] = editData
+const names = editData.name.split(" ")
 
-setTickets(updated)
+const firstName = names[0]
+const lastName = names.slice(1).join(" ")
+
+await fetch(
+`${API_URL}/${editData.seat}`,
+{
+method:"PUT",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+firstName,
+lastName,
+email:editData.email
+})
+}
+)
 
 setEditIndex(null)
+
+fetchTickets()
+
+}catch(error){
+
+console.error("Update failed:",error)
+
+}
 
 }
 
