@@ -19,8 +19,6 @@ fetch(API_URL)
 const formatted = data.map(ticket => ({
 name: ticket.firstName + " " + ticket.lastName,
 email: ticket.email,
-age: "-",
-gender: "-",
 seat: ticket.seatNumber,
 date: new Date(ticket.bookingDate).toLocaleDateString()
 }))
@@ -40,17 +38,25 @@ fetchTickets()
 },[])
 
 
-// Delete booking (reset all seats and refresh)
-const deleteTicket = async () => {
+// Delete only selected seat
+const deleteTicket = async (seatNumber) => {
 
 await fetch(
-"https://bus-booking-backend-yni2.onrender.com/api/tickets/admin/reset",
+`https://bus-booking-backend-yni2.onrender.com/api/tickets/${seatNumber}`,
 {
-method:"POST"
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+firstName:"",
+lastName:"",
+email:""
+})
 }
 )
 
-alert("All bookings cleared")
+alert("Booking removed")
 
 fetchTickets()
 
@@ -103,8 +109,6 @@ return(
 <tr>
 <th>Name</th>
 <th>Email</th>
-<th>Age</th>
-<th>Gender</th>
 <th>Seat</th>
 <th>Date</th>
 <th>Action</th>
@@ -117,7 +121,7 @@ return(
 {tickets.length === 0 ? (
 
 <tr>
-<td colSpan="7" className="no-bookings">
+<td colSpan="5" className="no-bookings">
 No bookings yet
 </td>
 </tr>
@@ -130,8 +134,6 @@ tickets.map((ticket,index)=>(
 
 <td>{ticket.name}</td>
 <td>{ticket.email}</td>
-<td>{ticket.age}</td>
-<td>{ticket.gender}</td>
 <td>{ticket.seat}</td>
 <td>{ticket.date}</td>
 
@@ -146,7 +148,7 @@ Edit
 
 <button
 className="delete-btn"
-onClick={deleteTicket}
+onClick={()=>deleteTicket(ticket.seat)}
 >
 Delete
 </button>
@@ -185,22 +187,6 @@ onChange={(e)=>setEditData({...editData,name:e.target.value})}
 value={editData.email}
 onChange={(e)=>setEditData({...editData,email:e.target.value})}
 />
-
-<input
-type="number"
-value={editData.age}
-onChange={(e)=>setEditData({...editData,age:e.target.value})}
-/>
-
-<select
-value={editData.gender}
-onChange={(e)=>setEditData({...editData,gender:e.target.value})}
->
-
-<option>Male</option>
-<option>Female</option>
-
-</select>
 
 <div className="modal-buttons">
 
